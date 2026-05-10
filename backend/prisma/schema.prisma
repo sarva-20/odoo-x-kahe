@@ -29,6 +29,7 @@ model Trip {
   checklists  Checklist[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  budgetAmount Float @default(0.0)
 }
 
 model Stop {
