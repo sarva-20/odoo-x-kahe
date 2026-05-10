@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import DoodleBackground from '../components/DoodleBackground';
 import AirplaneTransition from '../components/AirplaneTransition';
+<<<<<<< HEAD
 import { registerUser } from '../services/auth';
 import { useAuth } from '../context/AuthContext';
+=======
+import { useAuth } from '../context/AuthContext';
+import { registerUser } from '../services/auth';
+>>>>>>> 883c258 (Integration)
 
 const Register = () => {
     const navigate = useNavigate();
@@ -79,6 +84,7 @@ const Register = () => {
 
     const handleStartExploring = async () => {
         try {
+<<<<<<< HEAD
             const payload = {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
@@ -107,6 +113,28 @@ const Register = () => {
             setErrors((prev) => ({
                 ...prev,
                 submit: 'Unable to connect to server. Please try again.',
+=======
+            const response = await registerUser({
+                email: formData.email,
+                password: formData.password,
+                name: `${formData.firstName} ${formData.lastName}`.trim(),
+            });
+
+            if (!response?.success || !response?.token) {
+                throw new Error(response?.message || 'Registration failed');
+            }
+
+            login({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+            }, response.token);
+            setShowAirplane(true);
+        } catch (error) {
+            setErrors(prev => ({
+                ...prev,
+                submit: error.message || 'Unable to create your account'
+>>>>>>> 883c258 (Integration)
             }));
         }
     };
@@ -390,6 +418,11 @@ const Register = () => {
                             ${step === 4 ? 'translate-x-0 opacity-100 relative' : 
                               'translate-x-full opacity-0 pointer-events-none'}`}
                     >
+                        {errors.submit && (
+                            <div className="absolute top-4 left-4 right-4 p-3 rounded-md font-bold text-center border-2 bg-red-100 text-error border-error neo-shadow">
+                                {errors.submit}
+                            </div>
+                        )}
                         <div className="w-24 h-24 mb-6 relative">
                             <svg className="w-full h-full" viewBox="0 0 52 52">
                                 <circle className="stroke-primary" cx="26" cy="26" r="25" fill="none" strokeWidth="2" strokeDasharray="160" strokeDashoffset="0" />

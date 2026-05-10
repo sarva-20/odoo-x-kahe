@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import DoodleBackground from '../components/DoodleBackground';
 import Footer from '../components/Footer';
+import { getTripById, getTrips } from '../services/trips';
 
 export default function MyTrips() {
     const navigate = useNavigate();
@@ -10,91 +11,99 @@ export default function MyTrips() {
     const [groupBy, setGroupBy] = useState('status');
     const [filterType, setFilterType] = useState('all');
     const [sortBy, setSortBy] = useState('recent');
+    const [trips, setTrips] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    // ============================================================
-    // MOCK DATA - Replace with API call later
-    // ============================================================
-    const mockTrips = {
-        ongoing: [
-            {
-                id: 1,
-                name: 'European Summer Backpacking',
-                destinations: ['Paris', 'Rome', 'Barcelona'],
-                startDate: 'Jul 15, 2024',
-                endDate: 'Aug 30, 2024',
-                totalDays: 45,
-                elapsedDays: 20,
-                color: '#FF4500',
-                status: 'ongoing',
-            },
-        ],
-        upcoming: [
-            {
-                id: 2,
-                name: 'Bali Retreat',
-                destinations: ['Ubud', 'Canggu'],
-                startDate: 'Dec 20, 2024',
-                endDate: 'Jan 05, 2025',
-                totalDays: 16,
-                elapsedDays: 0,
-                color: '#004B57',
-                status: 'upcoming',
-            },
-            {
-                id: 3,
-                name: 'Swiss Alps Hike',
-                destinations: ['Zurich', 'Interlaken'],
-                startDate: 'Mar 10, 2025',
-                endDate: 'Mar 20, 2025',
-                totalDays: 10,
-                elapsedDays: 0,
-                color: '#FF4500',
-                status: 'upcoming',
-            },
-        ],
-        completed: [
-            {
-                id: 4,
-                name: 'Tokyo Drift',
-                destinations: ['Tokyo', 'Kyoto'],
-                startDate: 'Apr 10, 2023',
-                endDate: 'Apr 25, 2023',
-                totalDays: 15,
-                elapsedDays: 15,
-                color: '#004B57',
-                status: 'completed',
-            },
-            {
-                id: 5,
-                name: 'NYC Weekend',
-                destinations: ['New York'],
-                startDate: 'Dec 20, 2022',
-                endDate: 'Dec 24, 2022',
-                totalDays: 4,
-                elapsedDays: 4,
-                color: '#FF4500',
-                status: 'completed',
-            },
-        ],
+    useEffect(() => {
+        const loadTrips = async () => {
+            try {
+                setIsLoading(true);
+                const response = await getTrips();
+
+                if (!response?.success) {
+                    throw new Error(response?.message || 'Unable to load trips');
+                }
+
+                const detailedTrips = await Promise.all(
+                    (response.data || []).map(async (trip) => {
+                        try {
+                            const tripResponse = await getTripById(trip.id);
+                            return tripResponse?.data || trip;
+                        } catch {
+                            return trip;
+                        }
+                    })
+                );
+
+                setTrips(detailedTrips);
+            } catch (loadError) {
+                setError(loadError.message || 'Unable to load trips');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadTrips();
+    }, []);
+
+    const formatDate = (dateValue) => {
+        if (!dateValue) return 'TBD';
+        return new Date(dateValue).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    };
+
+    const getTripStatus = (trip) => {
+        const now = new Date();
+        const startDate = new Date(trip.startDate);
+        const endDate = new Date(trip.endDate);
+
+        if (endDate < now) return 'completed';
+        if (startDate > now) return 'upcoming';
+        return 'ongoing';
+    };
+
+    const getTripSummary = (trip) => {
+        const stops = trip.stops || [];
+        const destinations = stops.map((stop) => stop.cityName).filter(Boolean);
+        const totalDays = Math.max(
+            Math.ceil((new Date(trip.endDate) - new Date(trip.startDate)) / (1000 * 60 * 60 * 24)),
+            1
+        );
+        return {
+            destinations,
+            totalDays,
+            elapsedDays: getTripStatus(trip) === 'ongoing' ? Math.max(1, Math.ceil(totalDays / 2)) : getTripStatus(trip) === 'completed' ? totalDays : 0,
+        };
     };
 
     // ============================================================
     // FILTER & SEARCH LOGIC
     // ============================================================
-    const filterTrips = (trips) => {
-        return trips.filter((trip) => {
+    const filterTrips = (tripList) => {
+        return tripList.filter((trip) => {
             const matchesSearch =
                 trip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                trip.destinations.some((dest) =>
+                (trip.destinations || []).some((dest) =>
                     dest.toLowerCase().includes(searchQuery.toLowerCase())
                 );
             return matchesSearch;
         });
     };
 
-    const ongoingTrips = filterTrips(mockTrips.ongoing);
-    const upcomingTrips = filterTrips(mockTrips.upcoming);
-    const completedTrips = filterTrips(mockTrips.completed);
+    const enrichedTrips = trips.map((trip) => ({
+        ...trip,
+        ...getTripSummary(trip),
+        status: getTripStatus(trip),
+        color: getTripStatus(trip) === 'completed' ? '#9CA3AF' : getTripStatus(trip) === 'upcoming' ? '#FFB347' : '#FF4500',
+    }));
+
+    const ongoingTrips = filterTrips(enrichedTrips.filter((trip) => trip.status === 'ongoing'));
+    const upcomingTrips = filterTrips(enrichedTrips.filter((trip) => trip.status === 'upcoming'));
+    const completedTrips = filterTrips(enrichedTrips.filter((trip) => trip.status === 'completed'));
 
     // ============================================================
     // SVG ICONS
@@ -174,7 +183,7 @@ export default function MyTrips() {
                     borderLeft: `8px solid ${accentBorder}`,
                     fontFamily: 'Be Vietnam Pro',
                 }}
-                onClick={() => navigate('/itinerary-view')}
+                onClick={() => navigate(`/itinerary-view?tripId=${trip.id}`)}
             >
                 <div className="flex gap-6">
                     {/* Thumbnail */}
@@ -199,14 +208,14 @@ export default function MyTrips() {
                         {/* Destinations */}
                         <div className="flex items-center gap-2 mb-3 text-sm text-gray-700">
                             <MapPinIcon />
-                            <span>{trip.destinations.join(' • ')}</span>
+                            <span>{trip.destinations.length ? trip.destinations.join(' • ') : 'No stops added yet'}</span>
                         </div>
 
                         {/* Date Range */}
                         <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
                             <CalendarIcon />
                             <span>
-                                {trip.startDate} to {trip.endDate}
+                                {formatDate(trip.startDate)} to {formatDate(trip.endDate)}
                             </span>
                         </div>
 
@@ -271,7 +280,7 @@ export default function MyTrips() {
                                 }}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    navigate('/itinerary-view');
+                                    navigate(`/itinerary-view?tripId=${trip.id}`);
                                 }}
                             >
                                 View Trip
@@ -295,7 +304,7 @@ export default function MyTrips() {
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        navigate('/builder');
+                                        navigate(`/builder?tripId=${trip.id}`);
                                     }}
                                 >
                                     {trip.status === 'upcoming' ? 'Edit Plans' : 'Edit'}
@@ -423,6 +432,18 @@ export default function MyTrips() {
                         + New Trip
                     </button>
                 </div>
+
+                {isLoading && (
+                    <div className="bg-white border-2 border-black rounded-md neo-shadow p-6 mb-8 font-bold">
+                        Loading your trips...
+                    </div>
+                )}
+
+                {error && (
+                    <div className="bg-red-100 border-2 border-error rounded-md neo-shadow p-6 mb-8 font-bold text-error">
+                        {error}
+                    </div>
+                )}
 
                 {/* Search & Filter Row */}
                 <div className="flex gap-4 mb-12">

@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
+=======
+import React, { useState } from 'react';
+>>>>>>> 883c258 (Integration)
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import DoodleBackground from '../components/DoodleBackground';
+<<<<<<< HEAD
 import AirplaneTransition from '../components/AirplaneTransition';
 import { createTrip, createStop } from '../services/trips';
 
@@ -139,6 +144,49 @@ const PlanTrip = () => {
         </div>
     );
 
+=======
+import { createTrip } from '../services/trips';
+
+const PlanTrip = () => {
+    const navigate = useNavigate();
+    const [tripName, setTripName] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [description, setDescription] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setError('');
+
+        if (!tripName || !startDate || !endDate) {
+            setError('Trip name, start date, and end date are required.');
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            const response = await createTrip({
+                name: tripName,
+                startDate,
+                endDate,
+                description,
+            });
+
+            if (!response?.success || !response?.data?.id) {
+                throw new Error(response?.message || 'Unable to create trip');
+            }
+
+            navigate(`/builder?tripId=${response.data.id}`);
+        } catch (saveError) {
+            setError(saveError.message || 'Unable to create trip');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+>>>>>>> 883c258 (Integration)
     return (
         <div className="doodle-bg min-h-screen flex flex-col relative overflow-hidden">
             <DoodleBackground />
@@ -177,6 +225,7 @@ const PlanTrip = () => {
                             })}
                         </div>
                     </div>
+<<<<<<< HEAD
 
                     {/* Conveyor Belt Container */}
                     <div className="relative w-full flex-grow overflow-hidden">
@@ -469,6 +518,30 @@ const PlanTrip = () => {
                         </div>
 
                     </div>
+=======
+                    <form className="p-6 flex flex-col gap-6" onSubmit={handleSubmit}>
+                        <div>
+                            <label className="font-bold block mb-2">Trip Name</label>
+                            <input className="neo-input w-full p-3 border-2 border-primary rounded-md" placeholder="e.g. Summer in Tokyo" type="text" value={tripName} onChange={(event) => setTripName(event.target.value)} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="font-bold block mb-2">Start Date</label>
+                                <input className="neo-input w-full p-3 border-2 border-primary rounded-md" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+                            </div>
+                            <div>
+                                <label className="font-bold block mb-2">End Date</label>
+                                <input className="neo-input w-full p-3 border-2 border-primary rounded-md" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="font-bold block mb-2">Description</label>
+                            <textarea className="neo-input w-full p-3 border-2 border-primary rounded-md min-h-[120px]" placeholder="Describe the trip" value={description} onChange={(event) => setDescription(event.target.value)} />
+                        </div>
+                        {error && <div className="bg-red-100 text-error border-2 border-error rounded-md p-3 font-bold">{error}</div>}
+                        <button type="submit" disabled={isSaving} className="w-full bg-primary text-white py-4 font-bold rounded-md neo-shadow neo-btn text-xl mt-4 border-2 border-black disabled:opacity-60">{isSaving ? 'Creating...' : 'Create Trip'}</button>
+                    </form>
+>>>>>>> 883c258 (Integration)
                 </div>
             </main>
             <Footer />

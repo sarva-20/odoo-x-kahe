@@ -2,8 +2,10 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 
 module.exports = (req, res, next) => {
-  
-  const token = req.cookies.token;
+  const bearerToken = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.slice(7)
+    : null;
+  const token = bearerToken || req.cookies.token;
 
   if (!token) {
     return res.status(401).json({ 
