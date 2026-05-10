@@ -11,6 +11,12 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Password is required.' });
     }
     const token = await authService.registerUser(email, password, name);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: config.env === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     res.status(201).json({ success: true, token });
   } catch (error) {
     console.error('Register error:', error);

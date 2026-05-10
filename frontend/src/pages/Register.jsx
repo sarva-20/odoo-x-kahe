@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import DoodleBackground from '../components/DoodleBackground';
 import AirplaneTransition from '../components/AirplaneTransition';
+import { registerUser } from '../services/auth';
+import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [step, setStep] = useState(1);
     const [showAirplane, setShowAirplane] = useState(false);
     
@@ -74,8 +77,38 @@ const Register = () => {
         }));
     };
 
-    const handleStartExploring = () => {
-        setShowAirplane(true);
+    const handleStartExploring = async () => {
+        try {
+            const payload = {
+                name: `${formData.firstName} ${formData.lastName}`.trim(),
+                email: formData.email,
+                password: formData.password,
+            };
+
+            const response = await registerUser(payload);
+
+            if (!response?.success || !response?.token) {
+                setErrors((prev) => ({
+                    ...prev,
+                    submit: response?.message || 'Registration failed. Please try again.',
+                }));
+                return;
+            }
+
+            login(
+                {
+                    name: payload.name,
+                    email: payload.email,
+                },
+                response.token
+            );
+            setShowAirplane(true);
+        } catch (error) {
+            setErrors((prev) => ({
+                ...prev,
+                submit: 'Unable to connect to server. Please try again.',
+            }));
+        }
     };
 
     const StepHeader = ({ title }) => (
@@ -374,6 +407,9 @@ const Register = () => {
                         </div>
                         <h2 className="text-3xl font-black text-primary mb-2">Welcome to Traveloop, {formData.firstName || 'Traveler'}!</h2>
                         <p className="font-bold text-on-surface-variant text-lg mb-8">Your adventure starts now.</p>
+                        {errors.submit && (
+                            <p className="mb-4 text-sm font-bold text-error">{errors.submit}</p>
+                        )}
                         
                         <button 
                             className="w-full py-4 bg-primary text-white font-bold text-xl rounded-md neo-shadow neo-btn transition-all" 

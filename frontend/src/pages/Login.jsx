@@ -3,9 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import DoodleBackground from '../components/DoodleBackground';
 import AirplaneTransition from '../components/AirplaneTransition';
+import { loginUser } from '../services/auth';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [showAirplane, setShowAirplane] = useState(false);
     const [email, setEmail] = useState('');
@@ -45,7 +48,7 @@ const Login = () => {
         setPasswordError(validatePassword(password));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setBannerMessage('');
         
@@ -66,14 +69,32 @@ const Login = () => {
             return;
         }
 
-        // Success
-        setBannerType('success');
-        setBannerMessage('Welcome back! Redirecting...');
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            setIsLoading(true);
+            const response = await loginUser(email, password);
+
+            if (!response?.success || !response?.token) {
+                setBannerType('error');
+                setBannerMessage(response?.message || 'Login failed. Please try again.');
+                setIsLoading(false);
+                return;
+            }
+
+            login(
+                {
+                    email,
+                },
+                response.token
+            );
+
+            setBannerType('success');
+            setBannerMessage('Welcome back! Redirecting...');
             setShowAirplane(true);
-        }, 1000);
+        } catch (error) {
+            setBannerType('error');
+            setBannerMessage('Unable to connect to server. Please try again.');
+            setIsLoading(false);
+        }
     };
 
     const todayDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
