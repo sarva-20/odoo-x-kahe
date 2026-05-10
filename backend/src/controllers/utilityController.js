@@ -17,3 +17,11 @@ exports.addItem = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+exports.toggleItem = async (req, res) => {
+  try {
+    const updatedItem = await utilityService.toggleChecklistItem(req.userId, req.params.itemId);
+    res.status(200).json({ success: true, data: updatedItem });
+  } catch (error) {
+    res.status(403).json({ success: false, message: error.message });
+  }
+};

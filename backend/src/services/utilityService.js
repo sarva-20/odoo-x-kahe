@@ -8,8 +8,7 @@ class UtilityService {
       where: { id: parseInt(tripId), userId },
       select: {
         name: true,
-        // Since we don't have a 'budget' field in our current schema, 
-        // we'll assume a default or you can add a 'budgetAmount' to the Trip model.
+        
         stops: {
           select: {
             activities: {
@@ -51,6 +50,22 @@ class UtilityService {
       }
     });
   }
-}
 
+async toggleChecklistItem(userId, itemId) {
+  // First, verify the item belongs to a trip owned by the user
+  const item = await prisma.checklist.findFirst({
+    where: {
+      id: parseInt(itemId),
+      trip: { userId: userId }
+    }
+  });
+
+  if (!item) throw new Error("Item not found or unauthorized");
+
+  return await prisma.checklist.update({
+    where: { id: parseInt(itemId) },
+    data: { isPacked: !item.isPacked }
+  });
+}
+}
 module.exports = new UtilityService();
