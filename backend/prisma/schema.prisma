@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,43 +12,47 @@ model User {
   password  String
   name      String?
   // Add this line to complete the relationship
-  trips     Trip[]   
+  trips     Trip[]
   createdAt DateTime @default(now())
 }
 
 model Trip {
-  id          Int         @id @default(autoincrement())
-  name        String
-  startDate   DateTime
-  endDate     DateTime
-  description String?
-  userId      Int
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stops       Stop[]
-  checklists  Checklist[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  budgetAmount Float @default(0.0)
+  id           Int         @id @default(autoincrement())
+  name         String
+  startDate    DateTime
+  endDate      DateTime
+  description  String?
+  userId       Int
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops        Stop[]
+  checklists   Checklist[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  budgetAmount Float       @default(0.0)
 }
 
 model Stop {
-  id            Int        @id @default(autoincrement())
-  cityName      String
-  arrivalDate   DateTime?
-  departureDate DateTime?
-  tripId        Int
-  trip          Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  activities    Activity[]
+  id              Int        @id @default(autoincrement())
+  cityName        String
+  hotelCostPerDay Float?     @default(0)
+  transportCost   Float?     @default(0)
+  arrivalDate     DateTime?
+  departureDate   DateTime?
+  tripId          Int
+  trip            Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activities      Activity[]
 }
 
 model Activity {
-  id       Int     @id @default(autoincrement())
-  name     String
-  category String? // e.g., "Sightseeing", "Dining"
-  cost     Float   @default(0.0)
-  time     String? // e.g., "14:00"
-  stopId   Int
-  stop     Stop    @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  id                  Int     @id @default(autoincrement())
+  name                String
+  category            String? // e.g., "Sightseeing", "Dining"
+  cost                Float   @default(0.0)
+  time                String? // e.g., "14:00"
+  estimatedPopularity Int?    @default(50)
+  isFree              Boolean @default(false)
+  stopId              Int
+  stop                Stop    @relation(fields: [stopId], references: [id], onDelete: Cascade)
 }
 
 model Checklist {
@@ -59,4 +62,13 @@ model Checklist {
   isPacked Boolean @default(false)
   tripId   Int
   trip     Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+model CityCost {
+  id                 Int     @id @default(autoincrement())
+  cityName           String  @unique
+  avgHotelCostPerDay Float
+  avgFoodCostPerDay  Float
+  avgTransportCost   Float
+  budgetLevel        String?
 }

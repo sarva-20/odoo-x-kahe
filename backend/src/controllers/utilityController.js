@@ -1,4 +1,5 @@
 const utilityService = require('../services/utilityService');
+const recommendationService = require('../services/recommendationService');
 
 exports.getBudget = async (req, res) => {
   try {
@@ -23,5 +24,13 @@ exports.toggleItem = async (req, res) => {
     res.status(200).json({ success: true, data: updatedItem });
   } catch (error) {
     res.status(403).json({ success: false, message: error.message });
+  }
+};
+exports.getRecommendations = async (req, res) => {
+  try {
+    const recommendationData = await recommendationService.getRecommendations(req.userId, req.params.id);
+    res.status(200).json({ success: true, data: recommendationData });
+  } catch (error) {
+    res.status(404).json({ success: false, message: error.message });
   }
 };

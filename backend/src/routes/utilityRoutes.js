@@ -6,6 +6,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.use(authMiddleware);
 
 router.get('/trips/:id/budget', utilityController.getBudget);
+router.get('/trips/:id/recommendations', utilityController.getRecommendations);
 router.post('/trips/:id/checklist', utilityController.addItem);
 
 module.exports = router;
