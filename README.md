@@ -204,7 +204,6 @@ Authorization: Bearer <token>
 | Body Font | Be Vietnam Pro |
 | Card Shadow | 4px 4px 0px 0px #000 |
 
-Design philosophy: **Neo-brutalism** meets travel — bold borders, hard shadows, coral-dominant palette, scattered travel doodle background with cursor parallax.
 
 ---
 
@@ -221,4 +220,4 @@ Design philosophy: **Neo-brutalism** meets travel — bold borders, hard shadows
 
 ## 📄 License
 
-MIT License — Built with ❤️ for Odoo Hackathon 2025
+MIT License — Built with ❤️ for Odoo Hackathon 2026
