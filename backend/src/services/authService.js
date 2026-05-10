@@ -1,16 +1,7 @@
-const { PrismaClient } = require('@prisma/client');
-const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
-
-const databaseUrl = config.database.url;
-if (!databaseUrl) {
-  throw new Error('FATAL ERROR: DATABASE_URL is not defined.');
-}
-
-const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
-const prisma = new PrismaClient({ adapter });
+const prisma = require('../config/prisma');
 
 class AuthService {
   async registerUser(email, password, name) {
@@ -22,7 +13,7 @@ class AuthService {
     if (!normalizedEmail || !normalizedPassword) {
       throw new Error('Email and password are required.');
     }
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) throw new Error("User already exists");
 
     const hashedPassword = await bcrypt.hash(normalizedPassword, config.security.saltRounds);

@@ -12,5 +12,50 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  // Add this line to complete the relationship
+  trips     Trip[]   
   createdAt DateTime @default(now())
+}
+
+model Trip {
+  id          Int         @id @default(autoincrement())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  description String?
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops       Stop[]
+  checklists  Checklist[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Stop {
+  id            Int        @id @default(autoincrement())
+  cityName      String
+  arrivalDate   DateTime?
+  departureDate DateTime?
+  tripId        Int
+  trip          Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activities    Activity[]
+}
+
+model Activity {
+  id       Int     @id @default(autoincrement())
+  name     String
+  category String? // e.g., "Sightseeing", "Dining"
+  cost     Float   @default(0.0)
+  time     String? // e.g., "14:00"
+  stopId   Int
+  stop     Stop    @relation(fields: [stopId], references: [id], onDelete: Cascade)
+}
+
+model Checklist {
+  id       Int     @id @default(autoincrement())
+  item     String
+  category String?
+  isPacked Boolean @default(false)
+  tripId   Int
+  trip     Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
 }
