@@ -213,9 +213,9 @@ Design philosophy: **Neo-brutalism** meets travel — bold borders, hard shadows
 | Name | Role |
 |---|---|
 | Sarvatarshan Sankar | Frontend — UI/UX, React, Design System |
-| [Teammate 2] | Backend — Node.js, Express, Prisma |
-| [Teammate 3] | Backend — Database, PostgreSQL, APIs |
-| [Teammate 4] | Full Stack — Integration, Testing |
+| Pranav  V M | Backend — Node.js, Express, Prisma |
+| Dhanyaa R S  | Backend — Database, PostgreSQL, APIs |
+| Hamreeth L S | Full Stack — Integration, Testing |
 
 ---
 
