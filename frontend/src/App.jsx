@@ -14,24 +14,25 @@ import Invoice from './pages/Invoice';
 import Community from './pages/Community';
 import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/my-trips" element={<MyTrips />} />
-        <Route path="/plan-trip" element={<PlanTrip />} />
-        <Route path="/builder" element={<ItineraryBuilder />} />
-        <Route path="/itinerary-view" element={<ItineraryView />} />
-        <Route path="/checklist" element={<Checklist />} />
-        <Route path="/notes" element={<Notes />} />
-        <Route path="/invoice" element={<Invoice />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/search" element={<ProtectedRoute><SearchResults /></ProtectedRoute>} />
+      <Route path="/my-trips" element={<ProtectedRoute><MyTrips /></ProtectedRoute>} />
+      <Route path="/plan-trip" element={<ProtectedRoute><PlanTrip /></ProtectedRoute>} />
+      <Route path="/builder" element={<ProtectedRoute><ItineraryBuilder /></ProtectedRoute>} />
+      <Route path="/itinerary-view" element={<ProtectedRoute><ItineraryView /></ProtectedRoute>} />
+      <Route path="/checklist" element={<ProtectedRoute><Checklist /></ProtectedRoute>} />
+      <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+      <Route path="/invoice" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
+      <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
     </Routes>
   );
 }
