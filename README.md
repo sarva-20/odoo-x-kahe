@@ -1,6 +1,6 @@
 # 🌍 Traveloop — Personalized Travel Planning Made Easy
 
-> Built for the Odoo Hackathon at KAHE Coimbatore | Team of 4 | 24 Hours
+> Built for the Odoo Hackathon at KAHE Coimbatore | Team of 4 | KPRIET
 
 ---
 
